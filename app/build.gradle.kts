@@ -80,4 +80,5 @@ dependencies {
 
     debugImplementation("androidx.compose.ui:ui-tooling:1.7.8")
     debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.1")
+    testImplementation(kotlin("test"))
 }

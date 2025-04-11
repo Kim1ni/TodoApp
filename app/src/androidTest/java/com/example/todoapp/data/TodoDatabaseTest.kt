@@ -6,12 +6,14 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.junit.Assert.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 class TodoDatabaseTest {
@@ -79,20 +81,44 @@ class TodoDatabaseTest {
     }
 
     @Test
-    fun getActiveTodos() = runBlocking {
+    fun getActiveTodos() = runTest { // Use runTest
         // Given
-        todoDao.insertTodo(Todo(title = "Active 1"))
-        todoDao.insertTodo(Todo(title = "Active 2"))
-        todoDao.insertTodo(Todo(title = "Completed", isCompleted = true))
+        val active1 = Todo(title = "Active 1", isCompleted = false)
+        val active2 = Todo(title = "Active 2", isCompleted = false)
+        val completed1 = Todo(title = "Completed", isCompleted = true)
+        todoDao.insertTodo(active1)
+        todoDao.insertTodo(active2)
+        todoDao.insertTodo(completed1)
 
         // When
+        // .first() gets the current value from the Flow
         val activeTodos = todoDao.getActiveTodos().first()
 
         // Then
-        assertEquals(2, activeTodos.size)
-        assertEquals("Active 1", activeTodos[0].title)
-        assertEquals("Active 2", activeTodos[1].title)
+        assertEquals("Should be 2 active todos", 2, activeTodos.size)
+        // Check content regardless of order - more robust if DAO query has no ORDER BY
+        val activeTitles = activeTodos.map { it.title }.toSet()
+        assertEquals(setOf("Active 1", "Active 2"), activeTitles)
+        // Verify they are indeed active
+        assertTrue("All retrieved todos should be active", activeTodos.all { !it.isCompleted })
     }
+
+    /*
+        @Test
+        fun getActiveTodos() = runBlocking {
+            // Given
+            todoDao.insertTodo(Todo(title = "Active 1"))
+            todoDao.insertTodo(Todo(title = "Active 2"))
+            todoDao.insertTodo(Todo(title = "Completed", isCompleted = true))
+
+            // When
+            val activeTodos = todoDao.getActiveTodos().first()
+
+            // Then
+            assertEquals(2, activeTodos.size)
+            assertEquals("Active 1", activeTodos[0].title)
+            assertEquals("Active 2", activeTodos[1].title)
+        }*/
 
     @Test
     fun getCompletedTodos() = runBlocking {

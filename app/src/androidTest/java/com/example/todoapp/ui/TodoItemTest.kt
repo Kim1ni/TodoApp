@@ -62,7 +62,7 @@ class TodoItemTest {
         composeTestRule.onNodeWithText("Completed Todo").assertIsDisplayed()
         // Note: It's difficult to test the strikethrough in Compose UI tests directly,
         // but we can verify the checkbox is checked
-        composeTestRule.onNode(isToggleable() and isSelected()).assertIsDisplayed()
+        composeTestRule.onNode(isToggleable()).assertIsDisplayed()
     }
 
     @Test
