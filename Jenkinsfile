@@ -5,6 +5,10 @@ pipeline {
         ANDROID_SDK_ROOT = "/home/gabriel-kimani/Android/Sdk"  // Update this path
     }
 
+    tools {
+        jdk 'JDK17' // Replace 'JDK17' with the name you gave to your JDK 17 configuration in Jenkins
+    }
+
     stages {
         stage('Checkout') {
             steps {
