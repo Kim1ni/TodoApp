@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        ANDROID_SDK_ROOT = "/path/to/android/sdk"  // Update this path
+        ANDROID_SDK_ROOT = "/home/gabriel-kimani/Android/Sdk"  // Update this path
     }
 
     stages {
