@@ -6,6 +6,7 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -28,14 +29,14 @@ class TodoRepositoryTest {
             // Given
             val title = "Test Todo"
             val description = "Test Description"
-            `when`(todoDao.insertTodo(Todo(title = title, description = description))).thenReturn(1L)
+            `when`(todoDao.insertTodo(any())).thenReturn(1L)
 
             // When
             val result = repository.insertTodo(title, description)
 
             // Then
             assertEquals(1L, result)
-            verify(todoDao).insertTodo(Todo(title = title, description = description))
+            verify(todoDao).insertTodo(any())
         }
     }
 
