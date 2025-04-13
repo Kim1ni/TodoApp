@@ -19,9 +19,45 @@ pipeline {
     stages {
         stage('Environment Setup') {
             steps {
-                echo "Building branch: ${env.BRANCH_NAME}"
+                echo "Building branch: ${env.BRANCH_NAME ?: 'undefined'}"
                 sh 'java -version'
-                sh '$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list | grep "installed"'
+                
+                // Create and check Android SDK directories
+                sh '''
+                    mkdir -p $ANDROID_HOME/cmdline-tools/latest/bin || true
+                    if [ ! -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
+                        echo "Android SDK Command Line Tools not found. Installing..."
+                        
+                        # Create temp directory
+                        mkdir -p /tmp/android-sdk-download
+                        cd /tmp/android-sdk-download
+                        
+                        # Download and install Command Line Tools
+                        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+                        unzip -o commandlinetools-linux-*_latest.zip
+                        
+                        # Move to correct location
+                        mkdir -p $ANDROID_HOME/cmdline-tools || true
+                        mv cmdline-tools $ANDROID_HOME/cmdline-tools/latest || true
+                        
+                        # Cleanup
+                        cd -
+                        rm -rf /tmp/android-sdk-download
+                        
+                        # Make executable
+                        chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
+                    fi
+                    
+                    # Accept licenses
+                    yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+                    
+                    # Install required components
+                    $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+                    
+                    # Check installation
+                    $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list | grep installed
+                '''
+                
                 sh 'chmod +x ./gradlew'
             }
         }
