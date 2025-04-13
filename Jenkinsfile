@@ -3,7 +3,7 @@ pipeline {
     
     environment {
         // Define environment variables for this pipeline
-        ANDROID_HOME = "/home/jenkins/android-sdk"
+        ANDROID_HOME = "${env.WORKSPACE}/android-sdk"
         JAVA_HOME = "/usr/lib/jvm/java-17-openjdk-amd64"
         GRADLE_OPTS = "-Dorg.gradle.daemon=false -Dorg.gradle.caching=true -Dorg.gradle.parallel=true"
         BUILD_NUMBER_FORMATTED = "${BUILD_NUMBER.padLeft(3, '0')}"
