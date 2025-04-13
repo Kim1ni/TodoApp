@@ -1,4 +1,4 @@
-/*pipeline {
+pipeline {
     agent any
 
     environment {
@@ -70,7 +70,8 @@
         }
     }
 }
-*/
+
+/*
 pipeline {
     agent any
     
@@ -316,3 +317,4 @@ pipeline {
         }
     }
 }
+*/
