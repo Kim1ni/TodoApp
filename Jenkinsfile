@@ -19,46 +19,41 @@ pipeline {
     stages {
         stage('Environment Setup') {
             steps {
-                echo "Building branch: ${env.BRANCH_NAME ?: 'undefined'}"
-                sh 'java -version'
-                
-                // Create and check Android SDK directories
                 sh '''
-                    mkdir -p $ANDROID_HOME/cmdline-tools/latest/bin || true
-                    if [ ! -f "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" ]; then
-                        echo "Android SDK Command Line Tools not found. Installing..."
-                        
+                    # Create workspace Android SDK directory
+                    export ANDROID_SDK="${WORKSPACE}/android-sdk"
+                    mkdir -p ${ANDROID_SDK}
+                    
+                    # Download and install Android command-line tools if needed
+                    if [ ! -f "${ANDROID_SDK}/cmdline-tools/latest/bin/sdkmanager" ]; then
                         # Create temp directory
                         mkdir -p /tmp/android-sdk-download
                         cd /tmp/android-sdk-download
                         
-                        # Download and install Command Line Tools
+                        # Download command-line tools
                         wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+                        
+                        # Extract
                         unzip -o commandlinetools-linux-*_latest.zip
                         
-                        # Move to correct location
-                        mkdir -p $ANDROID_HOME/cmdline-tools || true
-                        mv cmdline-tools $ANDROID_HOME/cmdline-tools/latest || true
+                        # Create proper structure for Android SDK tools 
+                        mkdir -p ${ANDROID_SDK}/cmdline-tools
+                        # The key fix: Move contents to right place
+                        mv cmdline-tools ${ANDROID_SDK}/cmdline-tools/latest
                         
                         # Cleanup
                         cd -
                         rm -rf /tmp/android-sdk-download
-                        
-                        # Make executable
-                        chmod +x $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager
                     fi
                     
-                    # Accept licenses
-                    yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+                    # Make sure SDK tools are executable
+                    chmod +x ${ANDROID_SDK}/cmdline-tools/latest/bin/*
                     
-                    # Install required components
-                    $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
-                    
-                    # Check installation
-                    $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list | grep installed
+                    # Install required SDK components
+                    export PATH="${ANDROID_SDK}/cmdline-tools/latest/bin:${PATH}"
+                    yes | ${ANDROID_SDK}/cmdline-tools/latest/bin/sdkmanager --licenses || true
+                    ${ANDROID_SDK}/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.2"
                 '''
-                
-                sh 'chmod +x ./gradlew'
             }
         }
         
